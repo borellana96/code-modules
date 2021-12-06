@@ -1,0 +1,60 @@
+import { Document } from 'mongoose';
+
+export interface Order extends Document {
+  code: string;
+  only_history: boolean;
+  status_order: boolean;
+  supplier_status_order: any;
+  cancelation_justification: string;
+  status_payment: boolean;
+  status_dispached: boolean;
+  status_delivery: boolean;
+  attended: any[];
+  current_step: string;
+  // operation_number: string;
+  payu: any;
+  delivery_type_address_ERP: string;
+  pick_up_time?: Date;
+  method_send_id?: string
+  requestTime?: string,
+  payment_state: string;
+  payment_order_id: number;
+  error_ERP: string;
+  error_LOGERP: string;
+  error_no_connection: boolean;
+  type_payment: string;
+  amount_total_purchase: number;
+  amount_delivery: number;
+  user_phone: string;
+  amount_total: number;
+  amount_subtotal: number;
+  amount_discount: number;
+  currency: string;
+  exchange_rate: number;
+  address_id: string;
+  delivery_name_address: string;
+  delivery_phone: string;
+  delivery_address: string;
+  delivery_reference: string;
+  invoice_send: boolean;
+  invoice_ruc: string;
+  invoice_business_name: string;
+  invoice_address: string;
+  invoice_district: string;
+  invoice_province: string;
+  invoice_department: string;
+  district_id: string;
+  province_id: string;
+  session: string;
+  department_id: string;
+  ip_cliente: number;
+  tenant: string;
+  detail: any;
+  email_Send: string;
+  user_id: string;
+  create_date?: Date;
+  update_date?: Date;
+  code_ERP?: string;
+  create_by?: string;
+  update_by?: string;
+}

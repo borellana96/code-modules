@@ -1,0 +1,92 @@
+@import "../../../../variables.scss";
+:host {
+  .list-supplier {
+    display: flex;
+    align-items: center;
+    div {
+      width: 95%;
+    }
+  }
+  background-color: $bg-color;
+  display: block;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+/*   height: calc(100vh - 64px);
+  overflow-y: auto;
+  font-size: 14px; */
+  font-size: 14px;
+  .buttons-container {
+    display: inline-block;
+    text-align: right;
+    flex-grow: 2;
+    button {
+      display: inline-block;
+      margin: auto;
+      margin-right: 0;
+      width: fit-content;
+      margin-left: 10px;
+      min-width: 100px;
+    }
+  }
+  .container {
+    width: 100%;
+    max-width: unset;
+  }
+
+  .header {
+    //position: absolute;
+    position: fixed;
+    top: 64px;
+    display: inline-block;
+    height: 120px;
+    width: 100%;
+    background: #fa6f48 !important;
+    .container {
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+    }
+    .title {
+      display: inline-block;
+      color: #efefef;
+      text-align: left;
+    }
+  }
+  .fake-header {
+    width: 100%;
+    height: 64px;
+  }
+  .content {
+    position: relative;
+    margin-top: 70px;
+    margin-left: 64px;
+    z-index: 10;
+    .container {
+      @include shadow();
+      border-radius: 6px;
+    }
+  }
+  .col-20,
+  .col-30 {
+    padding: 1em;
+  }
+  .subtitle-container {
+    margin-left: -14px;
+    margin-right: -14px;
+  }
+
+  .button-cancel {
+    margin-top: -10px !important;
+    height: 40px;
+    font-size: 11px;
+    font-weight: bold;
+    font-family: "Muli";
+  }
+
+  .col-20 {
+    &.button {
+      margin-top: -5px;
+    }
+  }
+}

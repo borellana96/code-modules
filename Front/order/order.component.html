@@ -1,0 +1,513 @@
+<div class="fake-header">
+</div>
+<div class="header" [ngClass]="{ 'fixed-top': headerFixed }">
+	<div class="container">
+		<div class="return-button" (click)='returnProducts()'><i class="fas fa-chevron-left"></i></div> &nbsp;
+		<!-- <div class="title">Pedido N° {{ orderNumber }}</div> -->
+		<div *ngIf="orderNumber" class="title">
+			{{ !attended ? 'Pedido N° ' + orderNumber + ' (No atendido)' : 'Pedido N° ' + orderNumber + ' (Atendido)' }}
+		</div>
+		<div class="buttons-container">
+			<button *ngIf="!attended" type="button" class="primary-button" (click)="changeAtended()">
+				<i class="fas fa-pencil"></i> Marcar Atendido
+			</button>
+			<button type="button" class="primary-button" (click)="resendEmail()">
+				<i class="far fa-envelope"></i> Reenviar correo
+			</button>
+		</div>
+	</div>
+</div>
+
+
+<section class="content">
+
+	<section class="container-partition" *ngIf="!isSupplier && validStatusFlow">
+		<section class="p-row p-ten cont-left">
+			<section class="container-row container-row-full">
+				<div class="status-order subtitle-container">
+					<p class="subtitle main-subtitle">Estado del pedido</p>
+					<!-- <div class="dropDownList" [style.width]="!isSupplier? '20%': '25%'" *ngIf="isValidateDropDownList">
+                        <form [formGroup]="orderForm">
+                            <mat-form-field>
+                                <mat-select placeholder="Seleccione" formControlName="optionSelected" name="optionSelected">
+                                    <mat-option *ngFor="let obj of dropDownList; let i = index " [value]="i">
+                                        {{obj.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </form>
+                        <button *ngIf="isSupplier" type="button" class="primary-button save-button button-subtitle"
+                            (click)="updateStatus()">
+                            Guardar estado
+                        </button>
+                    </div> -->
+				</div>
+				<br />
+				<section class="row">
+					<ng-container *ngFor="let ldv of listLDVFlow; let position = index">
+						<ng-container>
+							<section class="col-50">
+
+								<div class="center state-title"
+									[ngClass]="{ 'inactive-letter' : position >= 5 && numStatusOrder != 7 }">
+									{{ ldv.value }}
+								</div>
+								<section id="status" class="center">
+									<hr id="left-line" *ngIf="position > 0" [ngClass]="{ 
+                                            'active-line': position <= numStatusOrder - 1, 
+                                            'active-line-falied': numStatusOrder > 5,
+                                            'active-line-degrade-left' : position == numStatusOrder, 
+                                            'line-desactive' : position >= 5  }" />
+
+									<section id="container-circle">
+										<div id="circle"
+											[ngClass]="{ 
+                                                    'active-circle': position <= numStatusOrder - 1, 
+                                                    'active-circle-off' : position >= 5, 
+                                                    'active-circle-failed' : (numStatusOrder > 5 && position == numStatusOrder - 1) ,
+                                                    'circle-failed' : numStatusOrder > 5  && position < numStatusOrder - 1}">
+											<i class="fas fa-check"
+												*ngIf="position <= numStatusOrder - 1 && numStatusOrder < 6"></i>
+											<i class="fas fa-times"
+												*ngIf="position <= numStatusOrder - 1 && numStatusOrder > 5"></i>
+										</div>
+									</section>
+
+									<ng-container>
+										<hr id="right-line" *ngIf="position < listLDVFlow.length - 1" [ngClass]="{ 
+                                            'active-line': position <= numStatusOrder - 2, 
+                                            'active-line-falied': numStatusOrder > 5,
+                                            'active-line-degrade' : position == numStatusOrder - 1, 
+                                            'line-desactive' :position >= 4 }" />
+									</ng-container>
+								</section>
+
+
+							</section>
+						</ng-container>
+					</ng-container>
+				</section>
+			</section>
+		</section>
+	</section>
+	<section class="container-partition">
+		<section class="p-row p-three cont-left">
+			<section class="container-row">
+
+				<p class="subtitle main-subtitle subtitle-container">Información Cliente</p>
+				<br />
+				<ng-container *ngIf="orderInfo">
+					<ng-container *ngIf="orderInfo.user_id">
+						<p><b>Nombres:</b> </p>
+						<p>{{ orderInfo.user_id.additionals.name }}</p>
+						<p style="padding-top:10px;"><b>Apellido Paterno:</b></p>
+						<p>{{ orderInfo.user_id.additionals.last_name_father }}</p>
+						<p style="padding-top:10px;"><b>Apellido Materno:</b></p>
+						<p>{{ orderInfo.user_id.additionals.last_name_mother }}</p>
+						<p style="padding-top:10px;" class="table-name"><b>Email:</b></p>
+						<div class="flex">
+							<span class="info-email" mat-raised-button [matTooltip]="orderInfo.user_id.email"
+								matTooltipPosition="above" matTooltipHideDelay="100">
+								<span #useremail class="table-cut">{{ orderInfo.user_id.email }}
+								</span>
+							</span>
+							<span class="copy-clipboard" mat-raised-button [matTooltip]="'copiar al clipboard'"
+								matTooltipPosition="above" matTooltipHideDelay="100">
+								<button type="button" class="button button-cancel" (click)="copyTextMessage(useremail)">
+									<i class="fad fa-copy" aria-hidden="true"></i>
+								</button>
+
+							</span>
+						</div>
+						<p style="padding-top:10px;"><b>Celular:</b></p>
+						<p>{{ orderInfo.user_id.additionals.phone }}</p>
+					</ng-container>
+				</ng-container>
+			</section>
+
+			<section class="container-row clean-row" *ngIf='!isSupplier'>
+				<section>
+					<p class="subtitle main-subtitle subtitle-container">Detalle del pedido</p>
+					<ng-container *ngIf="orderInfo">
+						<section class="dividir-section dividir-section-order">
+							<table class="order-table">
+								<tr>
+									<td>Fecha de compra</td>
+									<td class="price">{{ orderInfo.create_date | date: "dd-MM-yyyy HH:mm:ss":"-0500" }}
+									</td>
+								</tr>
+								<tr>
+									<td class="table-name">Código ERP</td>
+									<td class="price">
+										<span *ngIf="!orderInfo.code_ERP">No existe código ERP asociado</span> {{
+										orderInfo.code_ERP }}
+									</td>
+								</tr>
+							</table>
+						</section>
+
+						<section class="dividir-section">
+							<table class="order-table">
+
+
+								<tr>
+									<td>Monto subtotal bruto</td>
+									<td class="price">
+										{{ orderInfo.amount_subtotal | currency: "S/" }}
+									</td>
+								</tr>
+								<tr>
+									<td>Descuento</td>
+									<td class="price">
+										{{ orderInfo.amount_discount | currency: "- S/ " }}
+									</td>
+								</tr>
+								<tr *ngIf="orderInfo.coupon && orderInfo.coupon.amount_discount_coupon">
+									<td>Subtotal Cupón</td>
+									<td class="price">
+										{{ orderInfo.coupon.amount_discount_coupon | currency: "- S/ " }}
+									</td>
+								</tr>
+								<tr>
+									<td>Monto subtotal neto</td>
+									<td class="price">
+										{{ orderInfo.amount_subtotal - orderInfo.amount_discount - (orderInfo.coupon ?
+										(orderInfo.coupon.amount_discount_coupon ?
+										orderInfo.coupon.amount_discount_coupon: 0): 0)| currency: "S/" }}
+									</td>
+								</tr>
+								<tr>
+									<td>Costo Delivery</td>
+									<td class="price">
+										{{ orderInfo.amount_delivery | currency: "+ S/" }}
+									</td>
+								</tr>
+								<tr *ngIf="orderInfo.coupon && orderInfo.coupon.amount_delivery_coupon">
+									<td>Delivery Cupón</td>
+									<td class="price">
+										{{ orderInfo.coupon.amount_delivery_coupon | currency: "- S/ " }}
+									</td>
+								</tr>
+								<tr>
+									<td>Total</td>
+									<td class="price">
+										{{ orderInfo.amount_total | currency: "S/" }}
+									</td>
+								</tr>
+							</table>
+						</section>
+					</ng-container>
+				</section>
+			</section>
+			<!--      <section class="container-row">
+        <p class="subtitle main-subtitle">Envio</p>
+        <hr />
+        <br />
+      </section> -->
+			<section class="container-row">
+				<section>
+					<p class="subtitle main-subtitle subtitle-container">Pago</p>
+					<br />
+					<ng-container *ngIf="orderInfo">
+						<span *ngIf="!orderInfo.status_payment" class="left">No pagado</span>
+						<section *ngIf="orderInfo.payu">
+							<div>
+								Payu
+							</div>
+							<div>Código de transacción : {{ orderInfo.payu.orderId }}</div>
+						</section>
+						<section *ngIf="orderInfo.visaNet">
+							<div>
+								VisaNet
+							</div>
+							<div>Código de transacción : {{ orderInfo.visaNet.dataMap.ID_UNICO }}</div>
+						</section>
+					</ng-container>
+				</section>
+				<br>
+				<!-- <hr> -->
+				<section>
+					<p class="subtitle main-subtitle" style="margin-bottom: 15px;">Información de Entrega</p>
+
+					<ng-container *ngIf="orderInfo">
+						<ng-container *ngIf="orderInfo.method_send_id">
+							<p><b>Método de entrega:</b> </p>
+							<p>{{ orderInfo.method_send_id.type.value }}</p>
+						</ng-container>
+						<ng-container *ngIf="orderInfo.requestTime">
+							<p style="padding-top:10px;"><b>Horario de recojo:</b></p>
+							<p>{{ orderInfo.requestTime }}</p>
+						</ng-container>
+						<ng-container
+							*ngIf="orderInfo.method_send_id && orderInfo.method_send_id.type.value == 'Recojo en tienda'">
+							<p style="padding-top:10px;"><b>Sede:</b></p>
+							<p>{{ orderInfo.method_send_id.name }}</p>
+						</ng-container>
+						<ng-container *ngIf="orderInfo.delivery_address">
+							<p style="padding-top:10px;"><b>Dirección:</b></p>
+							<p>{{ orderInfo.delivery_address }}</p>
+						</ng-container>
+						<ng-container *ngIf="!orderInfo.delivery_address">
+							<p style="padding-top:10px;"><b>Dirección de recojo:</b></p>
+							<p>{{ orderInfo.method_send_id.description }}</p>
+						</ng-container>
+						<ng-container *ngIf="orderInfo.delivery_reference">
+							<p style="padding-top:10px;"><b>Referencia:</b></p>
+							<p>{{ orderInfo.delivery_reference }}</p>
+						</ng-container>
+						<p style="padding-top:10px;"><b>Celular:</b></p>
+						<p>{{ orderInfo.user_phone }}</p>
+
+						<ng-container *ngIf="orderInfo.delivery_department_id">
+							<p style="padding-top:10px;"><b>Departamento:</b></p>
+							<p>{{ orderInfo.delivery_department_id.name }}</p>
+						</ng-container>
+						<ng-container *ngIf="orderInfo.delivery_province_id">
+							<p style="padding-top:10px;"><b>Provincia:</b></p>
+							<p>{{ orderInfo.delivery_province_id.name }}</p>
+						</ng-container>
+						<ng-container *ngIf="orderInfo.delivery_district_id">
+							<p style="padding-top:10px;"><b>Distrito:</b></p>
+							<p>{{ orderInfo.delivery_district_id.name }}</p>
+						</ng-container>
+					</ng-container>
+				</section>
+
+
+
+			</section>
+		</section>
+		<section class="p-row p-seven cont-right">
+
+			<section class="container-row">
+				<section>
+					<p class="subtitle main-subtitle subtitle-container">Productos del Pedido</p>
+					<br />
+					<section *ngFor="let provider of listProviderDelivery; let j = index" id='product-detail'>
+						<section id='name-supplier'>
+							<div>
+								<section>
+									Seller delivery: <strong>{{ provider.name }}</strong>
+								</section>
+								<section>
+									Día de entrega:
+									<span *ngIf='provider.delivery_day'>{{provider.delivery_day |
+										date:'dd-MM-yyyy'}}</span>
+									<span *ngIf='provider.range_day'>{{provider.range_day}} días</span>
+								</section>
+							</div>
+
+							<div *ngIf="provider.listorder[0].product_id.supplier.report_erp == false && numStatusOrder > 1 && validDropdownList"
+								class="dropDownList" width="35%">
+								<ng-container [formGroup]="getMethodSend(j)">
+									<div *ngIf="getMethodSend(j).value.validStatus == 'false';
+									else elseBlock">
+										<label>Estado: {{getMethodSend(j).value.nameStatus}}</label>
+									</div>
+									<ng-template #elseBlock>
+										<mat-form-field style="height: 50px;">
+											<mat-select placeholder="Seleccione" formControlName="optionSelected"
+												name="optionSelected">
+												<mat-option *ngFor="let obj of dropDownList" [value]="obj._id">
+													{{obj.name}}
+												</mat-option>
+											</mat-select>
+										</mat-form-field>
+										<button type="button" class="primary-button save-button button-subtitle"
+											(click)="openConfirmation(j)">
+											Guardar estado
+										</button>
+									</ng-template>
+								</ng-container>
+							</div>
+						</section>
+						<div class="detail-product">
+							<table class='detail-product-table'>
+								<thead>
+									<tr>
+										<th>
+											Imagen
+										</th>
+										<th>
+											Descripción
+										</th>
+										<th>
+											SKU
+										</th>
+										<ng-container>
+											<th>
+												Precio
+											</th>
+										</ng-container>
+
+										<th>
+											Cantidad
+										</th>
+										<ng-container>
+											<th>
+												Sub Total
+											</th>
+
+											<th *ngIf="validOrderField.has_discount">
+												Descuento
+											</th>
+											<th>
+												Total
+											</th>
+										</ng-container>
+
+										<ng-container *ngIf="validOrderField.has_detail_dedication">
+											<th>
+												Dedicatioria
+											</th>
+										</ng-container>
+										<!-- <ng-container *ngIf="validOrderField.has_campaign">
+                      <th>
+                        Campaña
+                      </th>
+                    </ng-container> -->
+									</tr>
+								</thead>
+								<tbody>
+									<tr *ngFor="let product of provider.listorder; let i = index">
+										<td>
+											<img [src]="
+                      product.product_id.image_cover !== ''
+                        ? url_attachment + product.product_id.image_cover
+                        : enterpriseLogo
+                    " alt="" />
+										</td>
+										<td>
+											{{ product.product_id.name }}
+										</td>
+										<td class="number">
+											{{product.product_id.SKU}}
+										</td>
+										<ng-container>
+											<td class="price">
+												{{product.product_price | currency: "S/" }}
+											</td>
+										</ng-container>
+
+										<td class="number">
+											{{ product.quantity }}
+										</td>
+										<ng-container>
+											<td class="price">
+												{{ product.amount_subtotal | currency: "S/" }}
+											</td>
+											<td class="price" *ngIf="validOrderField.has_discount">
+												<div class="reason" *ngIf="product.reason && product.discount > 0 && !isSupplier"
+													(click)="openReasonDetail(product.reason.entityName, product.reason.entity, product)">
+													{{ product.discount | currency: "S/" }}
+												</div>
+												<div *ngIf="!product.reason">
+													{{ product.discount | currency: "S/" }}
+												</div>
+												<div *ngIf="product.reason && isSupplier">
+													{{ product.discount | currency: "S/" }}
+												</div>
+											</td>
+											<td class="price">
+												{{ product.amount_total | currency: "S/" }}
+											</td>
+										</ng-container>
+
+
+
+										<td *ngIf="validOrderField.has_detail_dedication">
+											<ng-container *ngIf='product.dedication'>
+												<ng-container *ngIf='product.dedication.length > 0'>
+													<div class="center" (click)='toggleMessage(true, product)'>
+														Ver
+													</div>
+												</ng-container>
+											</ng-container>
+											<!--   <section class="detail-product">
+                        <div *ngFor="let item of [].constructor(product.quantity); let j = index">
+                          <ng-container *ngIf="orderInfo.detail[i].dedication && orderInfo.detail[i].dedication[j]">
+                            <p>Dedicatoria: {{ orderInfo.detail[i].dedication[j] }}</p>
+                          </ng-container>
+                        </div>
+                      </section> -->
+										</td>
+										<!-- <td class="number" *ngIf="validOrderField.has_campaign">
+                      <section class="detail-product">
+                        <section *ngIf="orderInfo.detail[i].reason">
+                          <div style="cursor: pointer;"
+                            (click)="openReasonDetail(orderInfo.detail[i].reason.entityName, orderInfo.detail[i].reason.entity._id, product)">
+                            Razón de descuento: <strong>Regla de descuento en
+                              {{ orderInfo.detail[i].reason.entityName }}</strong>
+                          </div>
+                        </section>
+                        <span *ngIf="!orderInfo.detail[i].reason">
+                          NO
+                        </span>
+                      </section>
+                    </td> -->
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</section>
+				</section>
+			</section>
+		</section>
+	</section>
+</section>
+<app-dialog-order-reason-detail #dialogOrderReasonDetail>
+</app-dialog-order-reason-detail>
+
+<article class="container-modal" *ngIf="showPopupMessage">
+	<section class="modal-body modal-small">
+		<header>
+			Dedicatoria
+		</header>
+		<section class="body">
+			<table>
+				<thead>
+					<tr>
+						<th>Mensaje</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor='let dedication of listDedication'>
+						<td>
+							{{dedication}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+		<footer>
+			<button class="button-option button-cancel" (click)="toggleMessage(false)">
+				Cerrar
+			</button>
+		</footer>
+
+	</section>
+</article>
+
+<section>
+	<article class="container-modal" *ngIf="showSumaryConfirmation">
+		<section class="modal-body modal-small">
+			<header>
+				<strong>Estado de Orden</strong>
+				<div id="close-button" (click)="closeConfirmation()">&times;</div>
+			</header>
+			<section class="body">
+				<p>¿Está seguro que desea cambiar el estado de la orden?</p>
+			</section>
+			<footer>
+				<button type="button" class="primary-button button-subtitle cancel-button"
+					(click)="closeConfirmation()">
+					Cancelar
+				</button>
+				<button type="button" class="primary-button save-button button-subtitle save-button-style"
+					(click)="updateStatus()">
+					Aceptar
+				</button>
+			</footer>
+		</section>
+	</article>
+</section>

@@ -1,0 +1,71 @@
+<div class="fake-header">
+</div>
+<div class="header" [ngClass]="{ 'fixed-top': headerFixed }">
+    <div class="container">
+        <div class="title">Reporte de Ventas</div>
+        <div class="buttons-container">
+
+            <button type="button" class="primary-button" (click)="exportReport()">
+                <i class="fas fa-save"></i> &nbsp; Exportar
+            </button>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <section class="container">
+        <p class="sub-tittle main-subtitle subtitle-container">Rango de Fechas</p>
+        <br />
+
+        <section class="row">
+            <section class="col-50 list-supplier">
+                <div>
+                    <form [formGroup]="searchForm" class="row block-center" *ngIf='listSupplier.length > 0'>
+                        <mat-form-field>
+                            <mat-select placeholder="Seller" formControlName="supplier" name="supplier">
+                                <mat-option  [value]="'all'">
+                                    Todos
+                                </mat-option>
+                                <mat-option *ngFor="let supplier of listSupplier" [value]="supplier._id">
+                                    {{ supplier.name }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </form>
+                </div>
+            </section>
+            <section class="col-50">
+                <form [formGroup]="searchForm" class="row block-center">
+                    <div class="col-40">
+                        <mat-form-field>
+                            <input matInput [matDatepicker]="dp3" [max]="searchForm.controls.dateEnd.value"
+                                placeholder="Fecha de inicio" class="form-control" formControlName="dateIni" readonly />
+                            <mat-datepicker-toggle matSuffix [for]="dp3"></mat-datepicker-toggle>
+                            <mat-datepicker #dp3 disabled="false"></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-40">
+                        <mat-form-field>
+                            <input matInput [matDatepicker]="dpEnd" [min]="searchForm.controls.dateIni.value"
+                                placeholder="Fecha de fin" class="form-control" formControlName="dateEnd" readonly />
+                            <mat-datepicker-toggle matSuffix [for]="dpEnd"></mat-datepicker-toggle>
+                            <mat-datepicker #dpEnd disabled="false"></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-20 button">
+                        <div class="buttons-container">
+                            <button type="button" class="button-option button-cancel" (click)="search()">
+                                <i class="fas fa-search-plus"></i> BUSCAR
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+        </section>
+    </section>
+
+    <section class='container'>
+        <app-grid #gridList>
+        </app-grid>
+    </section>
+</div>
